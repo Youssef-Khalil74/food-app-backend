@@ -1,16 +1,25 @@
 {
-  "name": "software-vscode",
+  "name": "food_app_backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Food app backend",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
-    "express": "^5.1.0"
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.16.3",
+    "knex": "^2.5.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
   }
 }
