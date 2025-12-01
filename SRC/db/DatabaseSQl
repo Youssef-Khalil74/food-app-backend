@@ -1,0 +1,49 @@
+CREATE TABLE Customer (
+  CustomerID INT PRIMARY KEY NOT NULL,
+  FirstName VARCHAR(50) NOT NULL,
+  LastName VARCHAR(50) NOT NULL,
+  Email VARCHAR(100) NOT NULL,
+  Pass VARCHAR(100) NOT NULL,
+  CardInfo VARCHAR(200) NULL
+);
+
+CREATE TABLE Orders (
+  OrderID INT PRIMARY KEY NOT NULL,
+  CustomerID INT NOT NULL,
+  RestaurantName VARCHAR(100) NOT NULL,
+  PaymentInfo VARCHAR(100) NOT NULL,
+  Date DATE NOT NULL, 
+  Time TIME NOT NULL,
+  FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+);
+
+CREATE TABLE ProductItem (
+  ProductID INT PRIMARY KEY NOT NULL,
+  ProductName VARCHAR(100) NOT NULL,
+  ProductDescription VARCHAR(255) NULL,
+  ProductCategory VARCHAR(100) NOT NULL,
+  Price DECIMAL(10,2) NOT NULL
+);
+
+CREATE TABLE OrderItem (
+  OrderItemID INT PRIMARY KEY NOT NULL,
+  OrderID INT NOT NULL,
+  ProductID INT NOT NULL,
+  Quantity INT NOT NULL,
+  Price DECIMAL(10,2) NOT NULL,
+  FOREIGN KEY (OrderID) REFERENCES Orders(OrderID),
+  FOREIGN KEY (ProductID) REFERENCES ProductItem(ProductID)
+);
+
+CREATE TABLE Restaurant (
+  RestaurantName VARCHAR(100) PRIMARY KEY NOT NULL,
+  FoodItems VARCHAR(255) NULL
+);
+
+CREATE TABLE Manage (
+  RestaurantName VARCHAR(100) NOT NULL,
+  OrderID INT NOT NULL,
+  PRIMARY KEY (RestaurantName, OrderID),
+  FOREIGN KEY (RestaurantName) REFERENCES Restaurant(RestaurantName),
+  FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
