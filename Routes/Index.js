@@ -6,21 +6,21 @@ const express = require('express');
 const router = express.Router();
 
 // Import middleware
-const { authMiddleware } = require('../middleware/auth');
+const { authMiddleware } = require('../Middleware/auth');
 
 // Import public routes
-const registrationRouter = require('./public/registration');
+const registrationRouter = require('./Public/Registration');
 
 // Import private routes
-const accountRouter = require('./private/account');
-const restaurantRouter = require('./private/restaurant');
+const accountRouter = require('./Private/Account');
+const restaurantRouter = require('./Private/ManagingRestaurants');
 const foodRouter = require('./private/food');
 const cartRouter = require('./private/cart');
 const orderRouter = require('./private/order');
 const pickupRouter = require('./private/pickup');
 const inventoryRouter = require('./private/inventory');
 const notificationRouter = require('./private/notification');
-const habitsRouter = require('./private/habits');
+const habitsRouter = require('./Private/Habits');
 const paymentRouter = require('./private/payment');
 
 // Database for public routes
