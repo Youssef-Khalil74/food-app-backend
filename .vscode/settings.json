@@ -1,3 +1,6 @@
 {
-    "git.ignoreLimitWarning": true
+  "git.ignoreLimitWarning": true,
+  "javascript.validate.enable": true,
+  "js/ts.implicitProjectConfig.checkJs": false,
+  "files.eol": "\n"
 }
