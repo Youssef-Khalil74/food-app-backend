@@ -172,19 +172,13 @@ router.post('/login', async function(req, res) {
 
         await db('FoodTruck.Sessions').insert(session);
 
-        // Set cookie options based on environment
-        const isProduction = process.env.NODE_ENV === 'production';
-        const cookieOptions = {
-            expires: expiresAt,
-            httpOnly: true,
-            sameSite: isProduction ? 'none' : 'lax',
-            secure: isProduction, // Only use secure in production (HTTPS)
-            path: '/'
-        };
-
         // Set cookie and return response
         return res
-            .cookie('session_token', token, cookieOptions)
+            .cookie('session_token', token, { 
+                expires: expiresAt,
+                httpOnly: true,
+                sameSite: 'lax'
+            })
             .status(200)
             .json({
                 message: 'Login successful',
@@ -194,8 +188,7 @@ router.post('/login', async function(req, res) {
                     email: user.email,
                     role: user.role
                 },
-                token: token, // Return token for frontend to use in Authorization header
-                expiresAt: expiresAt.toISOString() // Tell frontend when token expires
+                token: token // Also return token for API clients
             });
 
     } catch (error) {
@@ -271,6 +264,5 @@ router.delete('/:userId', async function(req, res) {
 });
 
 module.exports = router;
-
 
 
