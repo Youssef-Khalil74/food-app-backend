@@ -5,27 +5,49 @@
 const db = require('../connectors/db');
 
 /**
- * Extract session token from request cookies
+ * Extract session token from request
+ * Checks Authorization header first (for API clients), then cookies (for browsers)
  * @param {Object} req - Express request object
  * @returns {string|null} Session token or null
  */
 function getSessionToken(req) {
-    if (!req.headers.cookie) {
-        return null;
-    }
-    
-    const cookies = req.headers.cookie
-        .split(';')
-        .map(cookie => cookie.trim())
-        .filter(cookie => cookie.startsWith('session_token='))
-        .join('');
-
-    if (!cookies) {
-        return null;
+    // 1. Check Authorization header (Bearer token) - preferred for frontend apps
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.slice(7); // Remove 'Bearer ' prefix
+        if (token) return token;
     }
 
-    const sessionToken = cookies.slice('session_token='.length);
-    return sessionToken || null;
+    // 2. Check for token in request body (for some API calls)
+    if (req.body && req.body.token) {
+        return req.body.token;
+    }
+
+    // 3. Check for token in query params (not recommended but useful for testing)
+    if (req.query && req.query.token) {
+        return req.query.token;
+    }
+
+    // 4. Check cookies (for browser-based sessions)
+    if (req.cookies && req.cookies.session_token) {
+        return req.cookies.session_token;
+    }
+
+    // 5. Manual cookie parsing fallback
+    if (req.headers.cookie) {
+        const cookies = req.headers.cookie
+            .split(';')
+            .map(cookie => cookie.trim())
+            .filter(cookie => cookie.startsWith('session_token='))
+            .join('');
+
+        if (cookies) {
+            const sessionToken = cookies.slice('session_token='.length);
+            return sessionToken || null;
+        }
+    }
+
+    return null;
 }
 
 /**
@@ -109,4 +131,6 @@ async function getUserId(req) {
 }
 
 module.exports = { getSessionToken, getUser, getUserId };
+
+
 

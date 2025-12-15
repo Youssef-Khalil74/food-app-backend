@@ -37,6 +37,30 @@ router.get('/', async (req, res) => {
 });
 
 /**
+ * GET /api/v1/food/category/:category
+ * Get food items by category
+ * NOTE: This route MUST be before /:itemId to avoid route conflicts
+ */
+router.get('/category/:category', async (req, res) => {
+    try {
+        const { category } = req.params;
+
+        const items = await db
+            .select('m.*', 't.truckName', 't.truckId')
+            .from({ m: 'FoodTruck.MenuItems' })
+            .innerJoin('FoodTruck.Trucks as t', 'm.truckId', 't.truckId')
+            .whereRaw('LOWER(m.category) = ?', [category.toLowerCase()])
+            .where('m.status', 'available')
+            .orderBy('m.name', 'asc');
+
+        return res.status(200).json(items);
+    } catch (error) {
+        console.error('Get food by category error:', error.message);
+        return res.status(500).json({ error: 'Server Error', message: error.message });
+    }
+});
+
+/**
  * GET /api/v1/food/:itemId
  * Get single food item details
  */
@@ -200,28 +224,7 @@ router.delete('/:itemId', async (req, res) => {
     }
 });
 
-/**
- * GET /api/v1/food/category/:category
- * Get food items by category
- */
-router.get('/category/:category', async (req, res) => {
-    try {
-        const { category } = req.params;
-
-        const items = await db
-            .select('m.*', 't.truckName', 't.truckId')
-            .from({ m: 'FoodTruck.MenuItems' })
-            .innerJoin('FoodTruck.Trucks as t', 'm.truckId', 't.truckId')
-            .whereRaw('LOWER(m.category) = ?', [category.toLowerCase()])
-            .where('m.status', 'available')
-            .orderBy('m.name', 'asc');
-
-        return res.status(200).json(items);
-    } catch (error) {
-        console.error('Get food by category error:', error.message);
-        return res.status(500).json({ error: 'Server Error', message: error.message });
-    }
-});
-
 module.exports = router;
+
+
 

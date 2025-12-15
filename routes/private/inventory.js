@@ -334,3 +334,5 @@ router.get('/alerts/low-stock', async (req, res) => {
 
 module.exports = router;
 
+
+

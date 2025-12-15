@@ -75,3 +75,5 @@ VALUES(7, 28, 10);
 INSERT INTO "FoodTruck"."Inventory"("itemId", "quantity", "lowStockThreshold")
 VALUES(8, 20, 10);
 
+
+

@@ -167,3 +167,5 @@ CREATE INDEX IF NOT EXISTS "idx_carts_userId" ON "FoodTruck"."Carts"("userId");
 CREATE INDEX IF NOT EXISTS "idx_sessions_token" ON "FoodTruck"."Sessions"("token");
 CREATE INDEX IF NOT EXISTS "idx_notifications_userId" ON "FoodTruck"."Notifications"("userId");
 
+
+

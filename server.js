@@ -7,6 +7,7 @@ require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
 
@@ -17,20 +18,50 @@ const routes = require('./routes/index');
 
 // Configuration
 const PORT = process.env.PORT || 3001;
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // ====================================
 // MIDDLEWARE SETUP
 // ====================================
 
-// CORS configuration
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || '*',
-    credentials: true
-}));
+// CORS configuration - Allow frontend to make requests
+const corsOptions = {
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        // List of allowed origins
+        const allowedOrigins = [
+            FRONTEND_URL,
+            'http://localhost:3000',
+            'http://localhost:3001',
+            'http://127.0.0.1:3000',
+            process.env.CORS_ORIGIN
+        ].filter(Boolean);
+        
+        if (allowedOrigins.includes(origin) || process.env.CORS_ORIGIN === '*') {
+            callback(null, true);
+        } else {
+            callback(null, true); // Allow all origins in development
+        }
+    },
+    credentials: true, // Allow cookies and authorization headers
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie'],
+    exposedHeaders: ['Set-Cookie']
+};
+
+app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options('*', cors(corsOptions));
 
 // Parse JSON and URL-encoded bodies
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// Parse cookies
+app.use(cookieParser());
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
