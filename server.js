@@ -1,6 +1,11 @@
 /**
  * Food Truck Backend Server
  * Main entry point for the application
+ * 
+ * ╔═══════════════════════════════════════════════════════════╗
+ * ║  🏴󠁧󠁢󠁳󠁣󠁴󠁿 Crafted with love by Scotland 🏴󠁧󠁢󠁳󠁣󠁴󠁿                      ║
+ * ║  "Alba gu bràth" - Scotland Forever                       ║
+ * ╚═══════════════════════════════════════════════════════════╝
  */
 require('dotenv').config();
 
@@ -21,6 +26,12 @@ const PORT = process.env.PORT || 3001;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:3000';
 
 // ====================================
+// TEMPLATE ENGINE SETUP
+// ====================================
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'hjs');
+
+// ====================================
 // MIDDLEWARE SETUP
 // ====================================
 
@@ -29,6 +40,11 @@ const corsOptions = {
     origin: function (origin, callback) {
         // Allow requests with no origin (mobile apps, Postman, etc.)
         if (!origin) return callback(null, true);
+        
+        // Allow ngrok URLs
+        if (origin.includes('ngrok-free.app') || origin.includes('ngrok.io')) {
+            return callback(null, true);
+        }
         
         // List of allowed origins
         const allowedOrigins = [
@@ -72,20 +88,83 @@ if (!fs.existsSync(uploadsDir)) {
 // Serve static files (uploaded images)
 app.use('/uploads', express.static(uploadsDir));
 
+// Serve static frontend files (but not index.html - let view routes handle /)
+app.use('/styles', express.static(path.join(__dirname, 'public', 'styles')));
+app.use('/src', express.static(path.join(__dirname, 'public', 'src')));
+app.use('/images', express.static(path.join(__dirname, 'public', 'images')));
+
 // ====================================
-// ROUTES
+// VIEW ROUTES (Frontend Pages)
 // ====================================
 
-// Root endpoint
+// Login Page (Public)
 app.get('/', (req, res) => {
-    res.json({
-        name: 'Food Truck Backend API',
-        version: '1.0.0',
-        description: 'GIU Food Truck Management System',
-        documentation: '/api/v1',
-        health: 'OK'
-    });
+    res.render('login');
 });
+
+// Register Page (Public)
+app.get('/register', (req, res) => {
+    res.render('register');
+});
+
+// Customer Dashboard
+app.get('/dashboard', (req, res) => {
+    res.render('customerHomepage');
+});
+
+// Browse Trucks
+app.get('/trucks', (req, res) => {
+    res.render('trucks');
+});
+
+// Truck Menu
+app.get('/truckMenu/:truckId', (req, res) => {
+    res.render('truckMenu');
+});
+
+// Shopping Cart
+app.get('/cart', (req, res) => {
+    res.render('cart');
+});
+
+// My Orders
+app.get('/myOrders', (req, res) => {
+    res.render('myOrders');
+});
+
+// Owner Dashboard
+app.get('/ownerDashboard', (req, res) => {
+    res.render('ownerDashboard');
+});
+
+// Menu Items Management
+app.get('/menuItems', (req, res) => {
+    res.render('menuItems');
+});
+
+// Add Menu Item
+app.get('/addMenuItem', (req, res) => {
+    res.render('addMenuItem');
+});
+
+// Truck Orders
+app.get('/truckOrders', (req, res) => {
+    res.render('truckOrders');
+});
+
+// Admin Dashboard
+app.get('/adminDashboard', (req, res) => {
+    res.render('adminDashboard');
+});
+
+// Account Page
+app.get('/account', (req, res) => {
+    res.render('account');
+});
+
+// ====================================
+// API ROUTES
+// ====================================
 
 // API info endpoint
 app.get('/api/v1', (req, res) => {
@@ -119,6 +198,28 @@ app.get('/api/v1', (req, res) => {
     });
 });
 
+// 🏴󠁧󠁢󠁳󠁣󠁴󠁿 Easter Egg #2: Secret Scotland endpoint (must be before routes!)
+app.get('/api/v1/scotland', (req, res) => {
+    const quotes = [
+        "Nae man can tether time or tide. - Robert Burns",
+        "Freedom is a noble thing. - John Barbour",
+        "I have not yet begun to fight! - John Paul Jones",
+        "Alba gu bràth! (Scotland Forever!)",
+        "We look to Scotland for all our ideas of civilisation. - Voltaire",
+        "Wha daur meddle wi' me? - Scottish Thistle Motto",
+        "In Scotland, there is no such thing as bad weather, only the wrong clothes."
+    ];
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+    
+    res.json({
+        message: "🏴󠁧󠁢󠁳󠁣󠁴󠁿 Ye found the secret! Welcome, fellow Scot!",
+        quote: randomQuote,
+        creator: "Scotland",
+        hiddenMessage: "The thistle may be prickly, but it's bonnie nonetheless.",
+        timestamp: new Date().toISOString()
+    });
+});
+
 // Mount all routes under /api/v1
 app.use('/api/v1', routes);
 
@@ -126,12 +227,13 @@ app.use('/api/v1', routes);
 // ERROR HANDLING
 // ====================================
 
-// 404 handler
-app.use((req, res) => {
+// 404 handler for API routes
+app.use('/api/*', (req, res) => {
     res.status(404).json({
         error: 'Not Found',
         message: `Cannot ${req.method} ${req.path}`,
-        hint: 'Check API documentation at /api/v1'
+        hint: 'Check API documentation at /api/v1',
+        scottishHint: "Ye might be a wee bit lost, laddie!" // Easter Egg #3
     });
 });
 
@@ -171,9 +273,11 @@ app.listen(PORT, () => {
     console.log('  🚚 Food Truck Backend Server');
     console.log('═'.repeat(50));
     console.log(`  ✓ Server running on port ${PORT}`);
+    console.log(`  ✓ Frontend: http://localhost:${PORT}`);
     console.log(`  ✓ API: http://localhost:${PORT}/api/v1`);
     console.log(`  ✓ Environment: ${process.env.NODE_ENV || 'development'}`);
     console.log('═'.repeat(50));
+    console.log('  🏴󠁧󠁢󠁳󠁣󠁴󠁿 Wasaaaaaap - Scotland');
     console.log('');
 });
 

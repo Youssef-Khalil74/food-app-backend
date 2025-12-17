@@ -114,24 +114,37 @@ router.get('/:orderId', async (req, res) => {
 });
 
 /**
- * POST /api/v1/order
- * Create order from cart
- */
+ * POST /api/v1/order
+ * Create order from cart
+ */
 router.post('/', async (req, res) => {
-    try {
-        const user = await getUser(req);
-        if (!user) {
-            return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
-        }
+    try {
+        const user = await getUser(req);
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
+        }
 
-        const { truckId, scheduledPickupTime } = req.body;
+        const { truckId, scheduledPickupTime } = req.body;
 
-        if (!truckId) {
-            return res.status(400).json({ error: 'Validation Error', message: 'Truck ID is required' });
-        }
+        if (!truckId) {
+            return res.status(400).json({ error: 'Validation Error', message: 'Truck ID is required' });
+        }
 
-        // Get cart items for this truck
-        const cartItems = await db
+        // Check if truck is accepting orders
+        const truck = await db('FoodTruck.Trucks').where('truckId', truckId).first();
+        if (!truck) {
+            return res.status(404).json({ error: 'Not Found', message: 'Truck not found' });
+        }
+
+        if (truck.orderStatus !== 'available') {
+            return res.status(400).json({ 
+                error: 'Truck Unavailable', 
+                message: 'This truck is not currently accepting orders. Please try again later.' 
+            });
+        }
+
+        // Get cart items for this truck
+        const cartItems = await db
             .select('c.*', 'm.truckId', 'm.name')
             .from({ c: 'FoodTruck.Carts' })
             .innerJoin('FoodTruck.MenuItems as m', 'c.itemId', 'm.itemId')
@@ -180,9 +193,8 @@ router.post('/', async (req, res) => {
             .whereIn('itemId', itemIds)
             .del();
 
-        // Create notification for truck owner
-        const truck = await db('FoodTruck.Trucks').where('truckId', truckId).first();
-        await db('FoodTruck.Notifications').insert({
+        // Create notification for truck owner (truck already fetched above)
+        await db('FoodTruck.Notifications').insert({
             userId: truck.ownerId,
             type: 'new_order',
             title: 'New Order Received',

@@ -1,0 +1,91 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white">
+    <div class="container">
+        <a class="navbar-brand" href="/dashboard">
+            <span class="logo-icon">🚚</span>
+            GIU Food Truck
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            {{#isCustomer}}
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {{#dashboardActive}}active{{/dashboardActive}}" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#trucksActive}}active{{/trucksActive}}" href="/trucks">Browse Trucks</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#ordersActive}}active{{/ordersActive}}" href="/myOrders">My Orders</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link btn-cart" href="/cart">
+                        🛒
+                        <span class="cart-badge" id="cartCount">0</span>
+                    </a>
+                </li>
+                <li class="nav-item ms-2">
+                    <a class="nav-link btn-logout" href="#" onclick="logout()">Logout</a>
+                </li>
+            </ul>
+            {{/isCustomer}}
+            
+            {{#isOwner}}
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link {{#dashboardActive}}active{{/dashboardActive}}" href="/ownerDashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#menuActive}}active{{/menuActive}}" href="/menuItems">Menu Items</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link {{#ordersActive}}active{{/ordersActive}}" href="/truckOrders">Orders</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link btn-logout" href="#" onclick="logout()">Logout</a>
+                </li>
+            </ul>
+            {{/isOwner}}
+        </div>
+    </div>
+</nav>
+
+<script>
+function logout() {
+    $.ajax({
+        url: '/api/v1/account/logout',
+        method: 'POST',
+        success: function() {
+            window.location.href = '/';
+        },
+        error: function() {
+            window.location.href = '/';
+        }
+    });
+}
+
+// Update cart count
+function updateCartCount() {
+    $.ajax({
+        url: '/api/v1/cart',
+        method: 'GET',
+        success: function(data) {
+            $('#cartCount').text(data.totalItems || 0);
+        }
+    });
+}
+
+$(document).ready(function() {
+    if ($('#cartCount').length) {
+        updateCartCount();
+    }
+});
+</script>
+

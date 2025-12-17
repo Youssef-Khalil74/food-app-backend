@@ -9,20 +9,26 @@ const { getUser } = require('../../utils/session');
 
 /**
  * GET /api/v1/food
- * Get all food items
+ * Get food items (filtered by owner's truck if truck owner)
  */
 router.get('/', async (req, res) => {
     try {
+        const user = await getUser(req);
         const { truckId, category } = req.query;
 
         let query = db
-            .select('m.*', 't.truckName', 't.truckId')
+            .select('m.*', 't.truckName', 't.truckId', 't.ownerId')
             .from({ m: 'FoodTruck.MenuItems' })
             .innerJoin('FoodTruck.Trucks as t', 'm.truckId', 't.truckId');
 
-        if (truckId) {
+        // If user is a truck owner, only show their menu items
+        if (user && user.role === 'truckOwner') {
+            query = query.where('t.ownerId', user.userId);
+        } else if (truckId) {
+            // Otherwise filter by specific truckId if provided
             query = query.where('m.truckId', truckId);
         }
+        
         if (category) {
             query = query.whereRaw('LOWER(m.category) = ?', [category.toLowerCase()]);
         }
@@ -79,10 +85,25 @@ router.post('/', async (req, res) => {
             return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
         }
 
-        const { truckId, name, description, price, category } = req.body;
+        // Check if user is a truck owner
+        if (user.role !== 'truckOwner') {
+            return res.status(403).json({ error: 'Forbidden', message: 'Only truck owners can add menu items' });
+        }
 
-        if (!truckId || !name || !price || !category) {
-            return res.status(400).json({ error: 'Validation Error', message: 'Truck ID, name, price, and category are required' });
+        let { truckId, name, description, price, category } = req.body;
+
+        // If no truckId provided, use the owner's truck
+        if (!truckId) {
+            // Get the owner's truck
+            const ownerTruck = await db('FoodTruck.Trucks').where('ownerId', user.userId).first();
+            if (!ownerTruck) {
+                return res.status(400).json({ error: 'No Truck', message: 'You do not have a truck yet. Please contact admin to create one.' });
+            }
+            truckId = ownerTruck.truckId;
+        }
+
+        if (!name || !price || !category) {
+            return res.status(400).json({ error: 'Validation Error', message: 'Name, price, and category are required' });
         }
 
         const truck = await db('FoodTruck.Trucks').where('truckId', truckId).first();
@@ -109,7 +130,7 @@ router.post('/', async (req, res) => {
         // Create inventory entry
         await db('FoodTruck.Inventory').insert({
             itemId: item[0].itemId,
-            quantity: 0,
+            quantity: 100, // Start with default stock
             lowStockThreshold: 10
         });
 

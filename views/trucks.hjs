@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Trucks - On-Time</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <span class="logo-icon">⏱️</span>
+                On-Time
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/trucks">Browse Trucks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myOrders">My Orders</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link btn-cart" href="/cart">
+                            🛒
+                            <span class="cart-badge" id="cartCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="nav-link btn-account" href="/account">
+                            👤 Account
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="nav-link btn-logout" href="#" onclick="logout()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="page-container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="section-title mb-0">
+                <span class="icon">🚚</span>
+                Browse Food Trucks
+            </h1>
+        </div>
+        
+        <div id="alertContainer"></div>
+        
+        <!-- Search/Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">🔍</span>
+                            <input type="text" class="form-control" id="searchInput" 
+                                   placeholder="Search trucks...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-control" id="statusFilter">
+                            <option value="">All Status</option>
+                            <option value="available">Available Only</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Trucks Grid -->
+        <div id="trucksContainer" class="row">
+            <div class="col-12 text-center py-5" id="trucksLoading">
+                <div class="spinner-border text-secondary" role="status"></div>
+                <p class="mt-2 text-muted">Loading trucks...</p>
+            </div>
+        </div>
+        
+        <div id="noTrucks" class="empty-state" style="display: none;">
+            <div class="icon">🚚</div>
+            <h3>No trucks found</h3>
+            <p>No food trucks match your search criteria.</p>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/src/roleGuard.js"></script>
+    <script>
+        if (!checkRole(['customer'])) {
+            document.body.style.display = 'none';
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            $.ajax({
+                url: '/api/v1/account/logout',
+                method: 'POST',
+                success: function() { window.location.href = '/'; },
+                error: function() { window.location.href = '/'; }
+            });
+        }
+    </script>
+    <script src="/src/trucks.js"></script>
+</body>
+</html>

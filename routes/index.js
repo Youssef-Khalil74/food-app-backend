@@ -9,19 +9,20 @@ const router = express.Router();
 const { authMiddleware } = require('../Middleware/auth');
 
 // Import public routes
-const registrationRouter = require('./Public/Registration');
+const registrationRouter = require('./Public/registration');
 
 // Import private routes
-const accountRouter = require('./Private/Account');
+const accountRouter = require('./Private/account');
 const restaurantRouter = require('./Private/ManagingRestaurants');
-const foodRouter = require('./private/food');
-const cartRouter = require('./private/cart');
-const orderRouter = require('./private/order');
-const pickupRouter = require('./private/pickup');
-const inventoryRouter = require('./private/inventory');
-const notificationRouter = require('./private/notification');
-const habitsRouter = require('./Private/Habits');
-const paymentRouter = require('./private/payment');
+const foodRouter = require('./Private/food');
+const cartRouter = require('./Private/cart');
+const orderRouter = require('./Private/order');
+const pickupRouter = require('./Private/pickup');
+const inventoryRouter = require('./Private/inventory');
+const notificationRouter = require('./Private/notification');
+const habitsRouter = require('./Private/habits');
+const paymentRouter = require('./Private/payment');
+const adminRouter = require('./Private/admin');
 
 // Database for public routes
 const db = require('../connectors/db');
@@ -220,6 +221,40 @@ router.get('/popular', async function(req, res) {
     }
 });
 
+// Specials/Announcements endpoint
+router.get('/specials', async function(req, res) {
+    try {
+        // Check if Specials table exists, if not return empty array
+        const specials = await db
+            .select(
+                's.specialId',
+                's.title',
+                's.description',
+                's.image',
+                's.type',
+                's.validUntil',
+                's.truckId',
+                't.truckName'
+            )
+            .from({ s: 'FoodTruck.Specials' })
+            .leftJoin('FoodTruck.Trucks as t', 's.truckId', 't.truckId')
+            .where('s.isActive', true)
+            .where(function() {
+                this.whereNull('s.validUntil')
+                    .orWhere('s.validUntil', '>=', new Date());
+            })
+            .orderBy('s.createdAt', 'desc')
+            .limit(6)
+            .catch(() => []); // Return empty if table doesn't exist
+
+        return res.status(200).json(specials);
+    } catch (error) {
+        // If specials table doesn't exist, just return empty array
+        console.error('Get specials error:', error.message);
+        return res.status(200).json([]);
+    }
+});
+
 // ====================================
 // PRIVATE ROUTES (Require Authentication)
 // ====================================
@@ -238,6 +273,7 @@ router.use('/inventory', inventoryRouter);
 router.use('/notification', notificationRouter);
 router.use('/habits', habitsRouter);
 router.use('/payment', paymentRouter);
+router.use('/admin', adminRouter);
 
 // Test route for authenticated access
 router.get('/test', (req, res) => {

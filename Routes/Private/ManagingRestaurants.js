@@ -6,7 +6,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../connectors/db');
 const { getUser } = require('../../utils/session');
-const upload = require('../../middleware/upload');
+const upload = require('../../Middleware/upload');
 const fs = require('fs');
 
 /**
@@ -51,6 +51,44 @@ router.get('/my-trucks', async (req, res) => {
 });
 
 /**
+ * PUT /api/v1/restaurant/status
+ * Update truck order status (owner only)
+ */
+router.put('/status', async (req, res) => {
+    try {
+        const user = await getUser(req);
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
+        }
+
+        if (user.role !== 'truckOwner') {
+            return res.status(403).json({ error: 'Forbidden', message: 'Only truck owners can update status' });
+        }
+
+        const { orderStatus } = req.body;
+
+        if (!orderStatus || !['available', 'unavailable', 'busy'].includes(orderStatus)) {
+            return res.status(400).json({ error: 'Validation Error', message: 'Valid orderStatus is required (available/unavailable/busy)' });
+        }
+
+        // Get owner's truck
+        const truck = await db('FoodTruck.Trucks').where('ownerId', user.userId).first();
+
+        if (!truck) {
+            return res.status(404).json({ error: 'Not Found', message: 'No truck found for this owner' });
+        }
+
+        // Update status
+        await db('FoodTruck.Trucks').where('truckId', truck.truckId).update({ orderStatus });
+
+        return res.status(200).json({ message: 'Status updated', orderStatus });
+    } catch (error) {
+        console.error('Update status error:', error.message);
+        return res.status(500).json({ error: 'Server Error', message: error.message });
+    }
+});
+
+/**
  * GET /api/v1/restaurant/:truckId
  * Get single restaurant/truck details
  */
@@ -82,7 +120,7 @@ router.get('/:truckId', async (req, res) => {
 
 /**
  * POST /api/v1/restaurant
- * Create a new restaurant/truck (truckOwner only)
+ * Create a new restaurant/truck (ADMIN ONLY - truck owners cannot create trucks)
  */
 router.post('/', upload.single('logo'), async (req, res) => {
     try {
@@ -92,12 +130,16 @@ router.post('/', upload.single('logo'), async (req, res) => {
             return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
         }
 
-        if (user.role !== 'truckOwner') {
+        // Only admin can create trucks
+        if (user.role !== 'admin') {
             if (req.file) fs.unlinkSync(req.file.path);
-            return res.status(403).json({ error: 'Forbidden', message: 'Only truck owners can create trucks' });
+            return res.status(403).json({ 
+                error: 'Forbidden', 
+                message: 'Only administrators can create food trucks. Please contact the admin.' 
+            });
         }
 
-        const { truckName } = req.body;
+        const { truckName, ownerId } = req.body;
 
         if (!truckName || !truckName.trim()) {
             if (req.file) fs.unlinkSync(req.file.path);
@@ -117,7 +159,7 @@ router.post('/', upload.single('logo'), async (req, res) => {
         const newTruck = {
             truckName: truckName.trim(),
             truckLogo: req.file ? `/uploads/${req.file.filename}` : null,
-            ownerId: user.userId,
+            ownerId: ownerId || user.userId,
             truckStatus: 'available',
             orderStatus: 'available'
         };
@@ -183,7 +225,7 @@ router.put('/:truckId', upload.single('logo'), async (req, res) => {
 
 /**
  * DELETE /api/v1/restaurant/:truckId
- * Delete a restaurant/truck (owner only)
+ * Delete a restaurant/truck (ADMIN ONLY)
  */
 router.delete('/:truckId', async (req, res) => {
     try {
@@ -192,15 +234,19 @@ router.delete('/:truckId', async (req, res) => {
             return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
         }
 
+        // Only admin can delete trucks
+        if (user.role !== 'admin') {
+            return res.status(403).json({ 
+                error: 'Forbidden', 
+                message: 'Only administrators can delete food trucks.' 
+            });
+        }
+
         const { truckId } = req.params;
         const truck = await db('FoodTruck.Trucks').where('truckId', truckId).first();
 
         if (!truck) {
             return res.status(404).json({ error: 'Not Found', message: 'Truck not found' });
-        }
-
-        if (truck.ownerId !== user.userId) {
-            return res.status(403).json({ error: 'Forbidden', message: 'You can only delete your own trucks' });
         }
 
         await db('FoodTruck.Trucks').where('truckId', truckId).del();

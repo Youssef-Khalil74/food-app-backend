@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Menu Item - On-Time</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="/ownerDashboard">
+                <span class="logo-icon">⏱️</span>
+                On-Time
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/ownerDashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/menuItems">Menu Items</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/truckOrders">Orders</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item ms-2">
+                        <a class="nav-link btn-account" href="/account">
+                            👤 Account
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn-logout" href="#" onclick="logout()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="page-container">
+        <div class="row justify-content-center">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="mb-0">➕ Add New Menu Item</h2>
+                    </div>
+                    <div class="card-body">
+                        <div id="alertContainer"></div>
+                        
+                        <form id="addMenuItemForm">
+                            <div class="mb-3">
+                                <label class="form-label">Item Name *</label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       placeholder="e.g., Classic Burger" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Category *</label>
+                                <input type="text" class="form-control" id="category" name="category" 
+                                       placeholder="e.g., Main Course, Sides, Beverages" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" 
+                                          rows="3" placeholder="Describe your item..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Price (EGP) *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">EGP</span>
+                                    <input type="number" class="form-control" id="price" name="price" 
+                                           step="0.01" min="0" placeholder="0.00" required>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2 mt-4">
+                                <button type="submit" class="btn btn-primary flex-grow-1">
+                                    Add Menu Item
+                                </button>
+                                <a href="/menuItems" class="btn btn-secondary">
+                                    Cancel
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/src/roleGuard.js"></script>
+    <script>
+        if (!checkRole(['truckOwner'])) {
+            document.body.style.display = 'none';
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            $.ajax({
+                url: '/api/v1/account/logout',
+                method: 'POST',
+                success: function() { window.location.href = '/'; },
+                error: function() { window.location.href = '/'; }
+            });
+        }
+    </script>
+    <script src="/src/addMenuItem.js"></script>
+</body>
+</html>

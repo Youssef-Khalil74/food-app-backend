@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - On-Time</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/styles/style.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container">
+            <a class="navbar-brand" href="/dashboard">
+                <span class="logo-icon">⏱️</span>
+                On-Time
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/trucks">Browse Trucks</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/myOrders">My Orders</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link btn-cart" href="/cart">
+                            🛒
+                            <span class="cart-badge" id="cartCount">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="nav-link btn-account" href="/account">
+                            👤 Account
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <a class="nav-link btn-logout" href="#" onclick="logout()">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container">
+            <h1>Welcome back! 👋</h1>
+            <p>What would you like to order today?</p>
+        </div>
+    </div>
+    
+    <div class="page-container">
+        <!-- Habits Section - Frequent Orders (FIRST - Compact) -->
+        <div class="habits-section habits-compact section-spacing">
+            <h2 class="section-title">
+                <span class="icon">⭐</span>
+                Habits
+            </h2>
+            <div id="habitsContainer" class="horizontal-scroll habits-scroll">
+                <div class="text-center py-3 w-100" id="habitsLoading">
+                    <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+                    <p class="mt-2 text-muted small">Loading your habits...</p>
+                </div>
+            </div>
+            <div id="noHabits" class="empty-state empty-state-compact" style="display: none;">
+                <div class="icon">🍽️</div>
+                <h3>No habits yet</h3>
+                <p>Start ordering to see your favorite items here!</p>
+                <a href="/trucks" class="btn btn-primary btn-sm">Browse Trucks</a>
+            </div>
+        </div>
+        
+        <!-- Available Trucks Section -->
+        <div class="section-spacing">
+            <h2 class="section-title">
+                <span class="icon">🚚</span>
+                Available Trucks
+            </h2>
+            <div id="trucksContainer" class="horizontal-scroll">
+                <div class="text-center py-4 w-100" id="trucksLoading">
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <p class="mt-2 text-muted">Loading trucks...</p>
+                </div>
+            </div>
+            <div id="noTrucks" class="empty-state" style="display: none;">
+                <div class="icon">🚚</div>
+                <h3>No trucks available</h3>
+                <p>Check back later for available food trucks.</p>
+            </div>
+        </div>
+        
+        <!-- Specials & Announcements Section -->
+        <div class="specials-section section-spacing">
+            <h2 class="section-title">
+                <span class="icon">🔥</span>
+                Specials & Announcements
+            </h2>
+            <div id="specialsContainer" class="specials-grid">
+                <div class="text-center py-4 w-100" id="specialsLoading">
+                    <div class="spinner-border text-secondary" role="status"></div>
+                    <p class="mt-2 text-muted">Loading specials...</p>
+                </div>
+            </div>
+            <div id="noSpecials" class="empty-state empty-state-compact" style="display: none;">
+                <div class="icon">📢</div>
+                <h3>No specials right now</h3>
+                <p>Check back for deals and announcements from trucks!</p>
+            </div>
+        </div>
+        
+        <!-- How It Works Section (Compact) -->
+        <div class="how-it-works-compact section-spacing">
+            <h4 class="section-title-small">
+                <span class="icon">📖</span>
+                How It Works
+            </h4>
+            <div class="how-it-works-steps">
+                <div class="step-item">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Browse Trucks</span>
+                </div>
+                <div class="step-divider">→</div>
+                <div class="step-item">
+                    <span class="step-number">2</span>
+                    <span class="step-text">Add to Cart</span>
+                </div>
+                <div class="step-divider">→</div>
+                <div class="step-item">
+                    <span class="step-number">3</span>
+                    <span class="step-text">Place Order</span>
+                </div>
+                <div class="step-divider">→</div>
+                <div class="step-item">
+                    <span class="step-number">4</span>
+                    <span class="step-text">Pick Up</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/src/roleGuard.js"></script>
+    <script>
+        // Check role before loading page
+        if (!checkRole(['customer'])) {
+            document.body.style.display = 'none';
+        }
+        
+        function logout() {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('user');
+            $.ajax({
+                url: '/api/v1/account/logout',
+                method: 'POST',
+                success: function() { window.location.href = '/'; },
+                error: function() { window.location.href = '/'; }
+            });
+        }
+    </script>
+    <script src="/src/dashboard.js"></script>
+</body>
+</html>

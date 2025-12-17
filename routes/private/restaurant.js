@@ -51,6 +51,44 @@ router.get('/my-trucks', async (req, res) => {
 });
 
 /**
+ * PUT /api/v1/restaurant/status
+ * Update truck order status (owner only)
+ */
+router.put('/status', async (req, res) => {
+    try {
+        const user = await getUser(req);
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
+        }
+
+        if (user.role !== 'truckOwner') {
+            return res.status(403).json({ error: 'Forbidden', message: 'Only truck owners can update status' });
+        }
+
+        const { orderStatus } = req.body;
+
+        if (!orderStatus || !['available', 'unavailable', 'busy'].includes(orderStatus)) {
+            return res.status(400).json({ error: 'Validation Error', message: 'Valid orderStatus is required (available/unavailable/busy)' });
+        }
+
+        // Get owner's truck
+        const truck = await db('FoodTruck.Trucks').where('ownerId', user.userId).first();
+
+        if (!truck) {
+            return res.status(404).json({ error: 'Not Found', message: 'No truck found for this owner' });
+        }
+
+        // Update status
+        await db('FoodTruck.Trucks').where('truckId', truck.truckId).update({ orderStatus });
+
+        return res.status(200).json({ message: 'Status updated', orderStatus });
+    } catch (error) {
+        console.error('Update status error:', error.message);
+        return res.status(500).json({ error: 'Server Error', message: error.message });
+    }
+});
+
+/**
  * GET /api/v1/restaurant/:truckId
  * Get single restaurant/truck details
  */
