@@ -189,6 +189,45 @@ router.put('/:itemId', async (req, res) => {
 });
 
 /**
+ * PATCH /api/v1/food/:itemId/toggle-availability
+ * Quick toggle food item availability (owner only)
+ */
+router.patch('/:itemId/toggle-availability', async (req, res) => {
+    try {
+        const user = await getUser(req);
+        if (!user) {
+            return res.status(401).json({ error: 'Unauthorized', message: 'Please login' });
+        }
+
+        const { itemId } = req.params;
+        const item = await db('FoodTruck.MenuItems').where('itemId', itemId).first();
+
+        if (!item) {
+            return res.status(404).json({ error: 'Not Found', message: 'Menu item not found' });
+        }
+
+        // Verify ownership
+        const truck = await db('FoodTruck.Trucks').where('truckId', item.truckId).first();
+        if (truck.ownerId !== user.userId) {
+            return res.status(403).json({ error: 'Forbidden', message: 'You can only update items on your own trucks' });
+        }
+
+        // Toggle the status
+        const newStatus = item.status === 'available' ? 'unavailable' : 'available';
+        await db('FoodTruck.MenuItems').where('itemId', itemId).update({ status: newStatus });
+
+        return res.status(200).json({ 
+            message: `Item marked as ${newStatus}`, 
+            itemId: parseInt(itemId),
+            status: newStatus 
+        });
+    } catch (error) {
+        console.error('Toggle availability error:', error.message);
+        return res.status(500).json({ error: 'Server Error', message: error.message });
+    }
+});
+
+/**
  * DELETE /api/v1/food/:itemId
  * Delete food item (owner only)
  */

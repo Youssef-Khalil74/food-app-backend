@@ -104,15 +104,27 @@ function filterByCategory(category) {
 function renderMenu(items) {
     let html = '';
     items.forEach(function(item) {
-        const disabledClass = truckIsAvailable ? '' : 'disabled';
-        const disabledAttr = truckIsAvailable ? '' : 'disabled';
-        const buttonText = truckIsAvailable ? 'Add to Cart' : 'Unavailable';
+        const itemAvailable = item.status === 'available';
+        const canOrder = truckIsAvailable && itemAvailable;
+        const disabledClass = canOrder ? '' : 'disabled';
+        const disabledAttr = canOrder ? '' : 'disabled';
+        const soldOutClass = !itemAvailable ? 'sold-out' : '';
+        
+        let buttonText = 'Add to Cart';
+        if (!itemAvailable) {
+            buttonText = 'Sold Out';
+        } else if (!truckIsAvailable) {
+            buttonText = 'Unavailable';
+        }
         
         html += `
-            <div class="menu-item-card">
+            <div class="menu-item-card ${soldOutClass}">
                 <div class="menu-item-content">
                     <div class="menu-item-info">
-                        <h4>${item.name}</h4>
+                        <div class="d-flex align-items-center gap-2">
+                            <h4>${item.name}</h4>
+                            ${!itemAvailable ? '<span class="sold-out-badge">SOLD OUT</span>' : ''}
+                        </div>
                         <span class="category">${item.category}</span>
                         <p class="description">${item.description || 'No description'}</p>
                         <div class="price">EGP ${parseFloat(item.price).toFixed(2)}</div>
@@ -123,7 +135,8 @@ function renderMenu(items) {
                             <input type="number" id="qty-${item.itemId}" value="1" min="1" readonly ${disabledAttr}>
                             <button onclick="incrementQty(${item.itemId})" ${disabledAttr}>+</button>
                         </div>
-                        <button class="btn btn-primary btn-sm ${disabledClass}" onclick="addToCart(${item.itemId})" ${disabledAttr}>
+                        <button class="btn ${!itemAvailable ? 'btn-secondary' : 'btn-primary'} btn-sm ${disabledClass}" 
+                                onclick="addToCart(${item.itemId})" ${disabledAttr}>
                             ${buttonText}
                         </button>
                     </div>

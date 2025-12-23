@@ -22,7 +22,13 @@
                     <a class="nav-link {{#ordersActive}}active{{/ordersActive}}" href="/myOrders">My Orders</a>
                 </li>
             </ul>
-            <ul class="navbar-nav">
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item me-2">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                        <span class="moon-icon">🌙</span>
+                        <span class="sun-icon">☀️</span>
+                    </button>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link btn-cart" href="/cart">
                         🛒
@@ -47,7 +53,13 @@
                     <a class="nav-link {{#ordersActive}}active{{/ordersActive}}" href="/truckOrders">Orders</a>
                 </li>
             </ul>
-            <ul class="navbar-nav">
+            <ul class="navbar-nav align-items-center">
+                <li class="nav-item me-2">
+                    <button class="theme-toggle" id="themeToggle" title="Toggle dark mode" aria-label="Toggle dark mode">
+                        <span class="moon-icon">🌙</span>
+                        <span class="sun-icon">☀️</span>
+                    </button>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link btn-logout" href="#" onclick="logout()">Logout</a>
                 </li>
@@ -82,10 +94,38 @@ function updateCartCount() {
     });
 }
 
+// Dark Mode Toggle
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    if (savedTheme) {
+        document.documentElement.setAttribute('data-theme', savedTheme);
+    } else if (prefersDark) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+}
+
+// Initialize theme immediately to prevent flash
+initTheme();
+
 $(document).ready(function() {
     if ($('#cartCount').length) {
         updateCartCount();
     }
+    
+    // Theme toggle button click handler
+    $('#themeToggle').on('click', function() {
+        toggleTheme();
+    });
 });
 </script>
 

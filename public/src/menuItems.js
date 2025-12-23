@@ -36,14 +36,28 @@ function loadMenuItems() {
 function renderMenuItems(items) {
     let html = '';
     items.forEach(function(item) {
-        const statusClass = item.status === 'available' ? 'text-success' : 'text-danger';
+        const isAvailable = item.status === 'available';
+        const statusClass = isAvailable ? 'text-success' : 'text-danger';
+        const statusText = isAvailable ? 'Available' : 'Sold Out';
+        const toggleBtnClass = isAvailable ? 'btn-success' : 'btn-outline-secondary';
+        const toggleIcon = isAvailable ? '✓' : '✗';
+        const toggleTitle = isAvailable ? 'Mark as Sold Out' : 'Mark as Available';
+        const rowClass = isAvailable ? '' : 'table-secondary';
+        
         html += `
-            <tr>
+            <tr class="${rowClass}">
                 <td>${item.name}</td>
                 <td><span class="category">${item.category}</span></td>
                 <td>${item.description ? item.description.substring(0, 50) + '...' : '-'}</td>
                 <td>EGP ${parseFloat(item.price).toFixed(2)}</td>
-                <td><span class="${statusClass}">${item.status || 'available'}</span></td>
+                <td>
+                    <button class="btn ${toggleBtnClass} btn-sm availability-toggle" 
+                            onclick="toggleAvailability(${item.itemId})" 
+                            title="${toggleTitle}"
+                            data-item-id="${item.itemId}">
+                        ${toggleIcon} ${statusText}
+                    </button>
+                </td>
                 <td>
                     <button class="btn btn-outline-primary btn-sm me-1" onclick="viewItem(${item.itemId})" title="View">
                         👁️
@@ -146,6 +160,35 @@ function getAuthHeaders() {
     return token ? { 'Authorization': 'Bearer ' + token } : {};
 }
 
+function toggleAvailability(itemId) {
+    const btn = $(`.availability-toggle[data-item-id="${itemId}"]`);
+    btn.prop('disabled', true);
+    
+    $.ajax({
+        url: '/api/v1/food/' + itemId + '/toggle-availability',
+        method: 'PATCH',
+        headers: getAuthHeaders(),
+        success: function(response) {
+            // Update local data
+            const item = allMenuItems.find(i => i.itemId === itemId);
+            if (item) {
+                item.status = response.status;
+            }
+            
+            // Re-render to update UI
+            renderMenuItems(allMenuItems);
+            
+            const statusText = response.status === 'available' ? 'available' : 'sold out';
+            showAlert('success', `Item marked as ${statusText}`);
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON || {};
+            showAlert('danger', error.message || 'Failed to update availability');
+            btn.prop('disabled', false);
+        }
+    });
+}
+
 function showAlert(type, message) {
     const alertHtml = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -154,5 +197,12 @@ function showAlert(type, message) {
         </div>
     `;
     $('#alertContainer').html(alertHtml);
+    
+    // Auto dismiss success alerts
+    if (type === 'success') {
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 2000);
+    }
 }
 

@@ -9,7 +9,7 @@
    ║  Alba gu bràth!                                             ║
    ╚═════════════════════════════════════════════════════════════╝ */
 
-/* CSS Variables */
+/* CSS Variables - Light Theme */
 :root {
     --primary-maroon: #800020;
     --primary-maroon-dark: #5c0018;
@@ -31,6 +31,36 @@
     --radius-md: 12px;
     --radius-lg: 16px;
     --transition: all 0.3s ease;
+    
+    /* Card and surface colors */
+    --card-bg: #ffffff;
+    --navbar-bg: #ffffff;
+    --input-bg: #ffffff;
+    --table-bg: #ffffff;
+    --modal-bg: #ffffff;
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --primary-maroon: #c44569;
+    --primary-maroon-dark: #a83d5a;
+    --primary-maroon-light: #e06488;
+    --secondary-cream: #1a1a2e;
+    --secondary-warm: #16213e;
+    --text-dark: #eaeaea;
+    --text-muted: #a0a0a0;
+    --text-light: #ffffff;
+    --border-light: #2d3a4f;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+    
+    /* Card and surface colors for dark mode */
+    --card-bg: #1f2937;
+    --navbar-bg: #111827;
+    --input-bg: #1f2937;
+    --table-bg: #1f2937;
+    --modal-bg: #1f2937;
 }
 
 /* Reset & Base */
@@ -61,12 +91,13 @@ a:hover {
    Navbar
    ==================================== */
 .navbar {
-    background-color: var(--text-light) !important;
+    background-color: var(--navbar-bg) !important;
     box-shadow: var(--shadow-sm);
     padding: 12px 0;
     position: sticky;
     top: 0;
     z-index: 1000;
+    transition: var(--transition);
 }
 
 .navbar-brand {
@@ -189,7 +220,7 @@ a:hover {
    Cards
    ==================================== */
 .card {
-    background: white;
+    background: var(--card-bg);
     border: none;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
@@ -203,10 +234,11 @@ a:hover {
 }
 
 .card-header {
-    background-color: white;
+    background-color: var(--card-bg);
     border-bottom: 1px solid var(--border-light);
     padding: 16px 20px;
     font-weight: 600;
+    color: var(--text-dark);
 }
 
 .card-body {
@@ -222,6 +254,8 @@ a:hover {
     padding: 12px 16px;
     font-size: 1rem;
     transition: var(--transition);
+    background-color: var(--input-bg);
+    color: var(--text-dark);
 }
 
 .form-control:focus {
@@ -257,7 +291,7 @@ a:hover {
 .auth-card {
     width: 100%;
     max-width: 440px;
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-lg);
     padding: 40px;
@@ -322,7 +356,7 @@ a:hover {
 }
 
 .quick-action-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 24px;
     text-align: center;
@@ -402,7 +436,7 @@ a:hover {
    ==================================== */
 .truck-card {
     flex: 0 0 280px;
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
@@ -464,7 +498,7 @@ a:hover {
    Habits Section
    ==================================== */
 .habits-section {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 24px;
     margin-bottom: 30px;
@@ -588,7 +622,7 @@ a:hover {
    Specials Section
    ==================================== */
 .specials-section {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 24px;
     box-shadow: var(--shadow-sm);
@@ -677,7 +711,7 @@ a:hover {
    How It Works Compact
    ==================================== */
 .how-it-works-compact {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 20px 24px;
     box-shadow: var(--shadow-sm);
@@ -810,7 +844,7 @@ a:hover {
    Menu Items
    ==================================== */
 .menu-item-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     margin-bottom: 16px;
@@ -820,6 +854,47 @@ a:hover {
 
 .menu-item-card:hover {
     box-shadow: var(--shadow-md);
+}
+
+/* Sold Out Item Styles */
+.menu-item-card.sold-out {
+    opacity: 0.7;
+    background: var(--secondary-warm);
+}
+
+.menu-item-card.sold-out:hover {
+    box-shadow: var(--shadow-sm);
+    transform: none;
+}
+
+.menu-item-card.sold-out .menu-item-info h4 {
+    color: var(--text-muted);
+}
+
+.menu-item-card.sold-out .price {
+    color: var(--text-muted);
+    text-decoration: line-through;
+}
+
+.sold-out-badge {
+    background: var(--danger);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Availability Toggle Button */
+.availability-toggle {
+    min-width: 100px;
+    transition: var(--transition);
+}
+
+.availability-toggle:hover {
+    transform: scale(1.02);
 }
 
 .menu-item-content {
@@ -879,7 +954,7 @@ a:hover {
     height: 32px;
     border-radius: 50%;
     border: 2px solid var(--border-light);
-    background: white;
+    background: var(--card-bg);
     color: var(--text-dark);
     font-size: 1rem;
     cursor: pointer;
@@ -906,7 +981,7 @@ a:hover {
     display: flex;
     align-items: center;
     padding: 16px;
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-sm);
     margin-bottom: 12px;
     box-shadow: var(--shadow-sm);
@@ -933,7 +1008,7 @@ a:hover {
 }
 
 .cart-summary {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 24px;
     box-shadow: var(--shadow-sm);
@@ -966,7 +1041,7 @@ a:hover {
    Orders
    ==================================== */
 .order-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
     margin-bottom: 16px;
@@ -1025,7 +1100,7 @@ a:hover {
    Owner Dashboard Stats
    ==================================== */
 .stat-card {
-    background: white;
+    background: var(--card-bg);
     border-radius: var(--radius-md);
     padding: 24px;
     text-align: center;
@@ -1053,7 +1128,7 @@ a:hover {
    Tables
    ==================================== */
 .table {
-    background: white;
+    background: var(--table-bg);
     border-radius: var(--radius-md);
     overflow: hidden;
     box-shadow: var(--shadow-sm);
@@ -1245,5 +1320,114 @@ a:hover {
 @keyframes pulse {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.7; }
+}
+
+/* ====================================
+   Dark Mode Toggle
+   ==================================== */
+.theme-toggle {
+    background: none;
+    border: 2px solid var(--border-light);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: var(--transition);
+    color: var(--text-dark);
+}
+
+.theme-toggle:hover {
+    border-color: var(--primary-maroon);
+    background-color: rgba(128, 0, 32, 0.08);
+    transform: rotate(15deg);
+}
+
+.theme-toggle .sun-icon {
+    display: none;
+}
+
+.theme-toggle .moon-icon {
+    display: block;
+}
+
+[data-theme="dark"] .theme-toggle .sun-icon {
+    display: block;
+}
+
+[data-theme="dark"] .theme-toggle .moon-icon {
+    display: none;
+}
+
+[data-theme="dark"] .theme-toggle {
+    border-color: var(--primary-maroon-light);
+    color: var(--primary-maroon-light);
+}
+
+[data-theme="dark"] .theme-toggle:hover {
+    background-color: rgba(224, 100, 136, 0.15);
+}
+
+/* Dark mode spinner overlay */
+[data-theme="dark"] .spinner-overlay {
+    background: rgba(26, 26, 46, 0.95);
+}
+
+/* Dark mode form select */
+[data-theme="dark"] .form-select {
+    background-color: var(--input-bg);
+    color: var(--text-dark);
+    border-color: var(--border-light);
+}
+
+/* Dark mode modal */
+[data-theme="dark"] .modal-content {
+    background-color: var(--modal-bg);
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .modal-header,
+[data-theme="dark"] .modal-footer {
+    border-color: var(--border-light);
+}
+
+/* Dark mode dropdown */
+[data-theme="dark"] .dropdown-menu {
+    background-color: var(--card-bg);
+    border-color: var(--border-light);
+}
+
+[data-theme="dark"] .dropdown-item {
+    color: var(--text-dark);
+}
+
+[data-theme="dark"] .dropdown-item:hover {
+    background-color: var(--secondary-warm);
+}
+
+/* Dark mode Bootstrap overrides */
+[data-theme="dark"] .bg-white {
+    background-color: var(--card-bg) !important;
+}
+
+[data-theme="dark"] .text-dark {
+    color: var(--text-dark) !important;
+}
+
+[data-theme="dark"] .border {
+    border-color: var(--border-light) !important;
+}
+
+/* Smooth theme transition for all elements */
+body,
+.navbar,
+.card,
+.btn,
+.form-control,
+.modal-content {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 

@@ -89,19 +89,23 @@ router.get('/trucks/:truckId', async function(req, res) {
 router.get('/trucks/:truckId/menu', async function(req, res) {
     try {
         const { truckId } = req.params;
-        const { category } = req.query;
+        const { category, includeUnavailable } = req.query;
 
         let query = db
             .select('itemId', 'name', 'description', 'price', 'category', 'status')
             .from('FoodTruck.MenuItems')
-            .where('truckId', truckId)
-            .where('status', 'available');
+            .where('truckId', truckId);
 
+        // By default, show all items (including unavailable) so customers can see what's sold out
+        // Available items are shown first, then unavailable
         if (category) {
             query = query.whereRaw('LOWER(category) = ?', [category.toLowerCase()]);
         }
 
-        const menuItems = await query.orderBy('category', 'asc').orderBy('name', 'asc');
+        const menuItems = await query
+            .orderByRaw("CASE WHEN status = 'available' THEN 0 ELSE 1 END")
+            .orderBy('category', 'asc')
+            .orderBy('name', 'asc');
         return res.status(200).json(menuItems);
     } catch (error) {
         console.error('Get menu error:', error.message);
